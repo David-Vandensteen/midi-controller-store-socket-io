@@ -78,6 +78,28 @@ describe('test Midi Controller Store Socket IO', () => {
     assert(await listen());
   });
 
+  it('should emit and receive valid MIDI data whith singleton', async () => {
+    const listen = () => new Promise((resolve, reject) => {
+      io.on('connection', (socket) => {
+        socket.on('data', (data) => {
+          try {
+            assert.strictEqual(data?.controller, 10, 'invalid received controller data');
+            assert.strictEqual(data?.channel, 1, 'invalid received channel data');
+            assert.strictEqual(data?.value, 15, 'invalid received value data');
+            return resolve(data);
+          } catch (error) {
+            Error(error);
+            return reject(error);
+          }
+        });
+      });
+    });
+
+    midiStore = MidiControllerStoreSocketIO.getInstance();
+    midiStore.set(10, 1, 15);
+    assert(await listen());
+  });
+
   it('should reveive clear command', async () => {
     const listenClear = () => new Promise((resolve) => {
       io.on('connection', (socket) => {
